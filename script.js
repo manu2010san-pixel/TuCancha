@@ -33,22 +33,32 @@ function nextStep(step) {
     currentStep = step;
 }
 
-// --- FIREBASE: LOGIN Y REGISTRO ---
+// --- FIREBASE: REGISTRO CON VERIFICACIÓN ---
 async function finalizarRegistroReal() {
     const email = document.getElementById('owner-email').value;
     const pass = document.getElementById('owner-pass').value;
     const nombre = document.getElementById('complex-name').value;
 
     try {
+        // 1. Crear el usuario
         const userCred = await window.createUser(window.auth, email, pass);
+        
+        // 2. Enviar correo de verificación real
+        await window.sendEmailVerif(window.auth.currentUser);
+        
+        // 3. Guardar datos en la nube
         await window.setDoc(window.doc(window.db, "duenos", userCred.user.uid), {
             nombreComplejo: nombre,
             gananciaNeta: 0,
             comisionAdmin: 0
         });
-        alert("¡Registro real exitoso!");
+
+        alert("¡Cuenta creada! Revisa tu correo para verificar tu cuenta antes de ingresar.");
         location.reload();
-    } catch (e) { alert(e.message); }
+    } catch (e) { 
+        console.error(e);
+        alert("Error: " + e.message); 
+    }
 }
 
 async function loginDueno() {
@@ -56,26 +66,34 @@ async function loginDueno() {
     const pass = document.getElementById('login-pass').value;
     try {
         const userCred = await window.signIn(window.auth, email, pass);
+        
+        // Verificar si el correo fue confirmado
+        if(!userCred.user.emailVerified) {
+            alert("Por favor, verifica tu correo electrónico antes de entrar.");
+            return;
+        }
+
         const docSnap = await window.getDoc(window.doc(window.db, "duenos", userCred.user.uid));
         if(docSnap.exists()) {
             document.getElementById('view-dueno-acceso').style.display = 'none';
             document.getElementById('view-dueno-menu').style.display = 'block';
-            document.getElementById('total-neto-dueno').innerText = `$${docSnap.data().gananciaNeta}`;
+            document.getElementById('total-neto-dueno').innerText = `$${docSnap.data().gananciaNeta.toLocaleString()}`;
+            totalGildaComision = docSnap.data().comisionAdmin || 0;
         }
-    } catch (e) { alert("Error al ingresar."); }
+    } catch (e) { alert("Error al ingresar. Revisa tus datos."); }
 }
 
 // --- JUGADOR: MARKETPLACE Y DETALLE ---
 function renderMarketplace() {
     const list = document.getElementById('pedidosya-list');
-    const dummyCanchas = [
+    const locales = [
         {nombre: "El Potrero", stars: "4.9", precio: 15000, suelo: "Sintético"},
         {nombre: "San Martín", stars: "4.5", precio: 12000, suelo: "Natural"}
     ];
-    list.innerHTML = dummyCanchas.map(c => `
-        <div class="py-card" onclick="verDetalle('${c.nombre}', ${c.precio}, '${c.suelo}')">
+    list.innerHTML = locales.map(l => `
+        <div class="py-card" onclick="verDetalle('${l.nombre}', ${l.precio}, '${l.suelo}')">
             <div class="py-img"><span class="py-tag">Anticipo 30%</span></div>
-            <div class="py-info"><h3>${c.nombre}</h3><p>$${c.precio}/hr • ⭐ ${c.stars}</p></div>
+            <div class="py-info"><h3>${l.nombre}</h3><p>$${l.precio}/hr • ⭐ ${l.stars}</p></div>
         </div>`).join('');
 }
 
@@ -84,9 +102,9 @@ function verDetalle(nombre, precio, suelo) {
     document.getElementById('view-cliente').style.display = 'none';
     document.getElementById('view-cancha-detalle').style.display = 'block';
     document.getElementById('det-nombre').innerText = nombre;
-    document.getElementById('det-precio').innerText = `$${precio}`;
-    document.getElementById('det-suelo').innerText = suelo;
-    document.getElementById('txt-anticipo').innerText = `Anticipo requerido (30%): $${precio * 0.3}`;
+    document.getElementById('det-precio').innerText = `$${precio.toLocaleString()}`;
+    document.getElementById('det-suelo').innerText = "Suelo: " + suelo;
+    document.getElementById('txt-anticipo').innerText = `Anticipo requerido (30%): $${(precio * 0.3).toLocaleString()}`;
 }
 
 function cerrarDetalle() {
@@ -100,13 +118,10 @@ function seleccionarTurno(el) {
 }
 
 function procesarReserva() {
-    const selected = document.querySelector('.time-slot.selected');
-    if(!selected) return alert("Selecciona un horario.");
-    
-    // Aquí el 5% para Gilda y el 95% para el dueño
+    if(!document.querySelector('.time-slot.selected')) return alert("Elige un horario.");
     let comision = canchaSeleccionada.precio * 0.05;
     totalGildaComision += comision;
-    alert(`¡Reserva confirmada! Pagaste el anticipo de $${canchaSeleccionada.precio * 0.3}`);
+    alert(`¡Reserva confirmada! Debes pagar el anticipo al dueño.`);
 }
 
 // --- SECRETO ADMIN GILDA ---
