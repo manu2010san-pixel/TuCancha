@@ -1,0 +1,51 @@
+:root {
+    --verde: #2ecc71;
+    --verde-campo: #27ae60;
+    --negro: #2c3e50;
+    --blanco: #ffffff;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    background-color: var(--verde-campo);
+    background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    min-height: 100vh;
+}
+
+/* PANTALLA INICIAL */
+.view-inicial { height: 100vh; display: flex; justify-content: center; align-items: center; }
+.welcome-content { background: white; padding: 40px; border-radius: 40px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); width: 85%; }
+.selector-roles { display: flex; gap: 15px; margin-top: 30px; }
+.card-role { flex: 1; padding: 25px 10px; border: 2px solid #f0f0f0; border-radius: 20px; background: white; cursor: pointer; transition: 0.3s; font-weight: bold; }
+.card-role:hover { border-color: var(--verde); transform: translateY(-5px); }
+
+/* HEADER */
+header { background: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+.logo-container { color: var(--verde); font-weight: 800; cursor: pointer; font-size: 1.3rem; }
+.badge-rol { background: var(--negro); color: white; padding: 5px 15px; border-radius: 20px; font-size: 10px; font-weight: bold; }
+
+/* MARKETPLACE PEDIDOSYA */
+.py-card { background: #fff; border-radius: 25px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); cursor: pointer; }
+.py-img { height: 150px; background: #ddd url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=500') center/cover; position: relative; }
+.py-tag { position: absolute; top: 15px; left: 15px; background: var(--verde); color: white; padding: 5px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: bold; }
+.py-info { padding: 15px; }
+
+/* DETALLE CANCHA */
+#view-cancha-detalle { background: white; min-height: 100vh; position: fixed; top: 0; left: 0; width: 100%; z-index: 200; overflow-y: auto; }
+.detalle-img { height: 250px; background: url('https://images.unsplash.com/photo-1529900748604-07564a03e7a6?q=80&w=1000') center/cover; }
+.detalle-info { padding: 25px; border-radius: 30px 30px 0 0; margin-top: -30px; background: white; position: relative; }
+.btn-back { position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.8); border: none; padding: 10px 15px; border-radius: 50%; cursor: pointer; z-index: 10; }
+.sticky-footer { position: sticky; bottom: 0; background: white; padding: 20px; border-top: 1px solid #eee; text-align: center; margin: 20px -25px -25px -25px; }
+
+/* COMPONENTES */
+.container { max-width: 450px; margin: 0 auto; padding: 20px 15px; }
+input, select { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; font-family: 'Poppins'; }
+.btn-primary { width: 100%; padding: 16px; background: var(--verde); color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; }
+.calendar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
+.time-slot { padding: 12px; border-radius: 10px; text-align: center; font-weight: bold; cursor: pointer; border: 2px solid transparent; }
+.available { background: #e8f8f0; color: var(--verde); border-color: #d1f2e1; }
+.available.selected { background: var(--verde); color: white; border-color: var(--verde); }
+.busy { background: #eee; color: #aaa; cursor: not-allowed; }
+.admin-panel-card { background: white; padding: 40px; border-radius: 40px; border: 4px solid #f1c40f; text-align: center; }
