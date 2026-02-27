@@ -1,93 +1,137 @@
 let currentStep = 1;
 let totalGildaComision = 0;
 let clicksLogo = 0;
+let cantCanchasGlobal = 0;
 let canchaSeleccionada = {};
 
-// --- NAVEGACIÓN ---
+// --- NAVEGACIÓN PRINCIPAL ---
 function seleccionarRol(rol) {
     document.getElementById('view-inicio').style.display = 'none';
     document.getElementById('app-header').style.display = 'flex';
     if(rol === 'cliente') {
         document.getElementById('view-cliente').style.display = 'block';
-        document.getElementById('indicador-rol').innerText = "JUGADOR";
+        document.getElementById('indicador-rol').innerText = "MODO JUGADOR";
         renderMarketplace();
     } else {
         document.getElementById('view-dueno-acceso').style.display = 'block';
-        document.getElementById('indicador-rol').innerText = "DUEÑO";
+        document.getElementById('indicador-rol').innerText = "ACCESO PROPIETARIO";
     }
 }
 
-// --- MARKETPLACE ESTILO PEDIDOSYA ---
+function mostrarLogin() { 
+    document.getElementById('selector-acceso').style.display = 'none'; 
+    document.getElementById('form-login').style.display = 'block'; 
+}
+
+function mostrarRegistro() { 
+    document.getElementById('selector-acceso').style.display = 'none'; 
+    document.getElementById('flujo-registro').style.display = 'block'; 
+}
+
+function nextStep(step) { 
+    document.getElementById(`step-${currentStep}`).style.display = 'none'; 
+    document.getElementById(`step-${step}`).style.display = 'block'; 
+    currentStep = step; 
+}
+
+// --- FIREBASE: PROPIETARIO ---
+async function finalizarRegistroReal() {
+    const email = document.getElementById('owner-email').value;
+    const pass = document.getElementById('owner-pass').value;
+    const nombre = document.getElementById('complex-name').value;
+    const cant = document.getElementById('complex-qty').value;
+
+    try {
+        const userCred = await window.createUser(window.auth, email, pass);
+        await window.sendEmailVerif(window.auth.currentUser);
+        await window.setDoc(window.doc(window.db, "propietarios", userCred.user.uid), {
+            nombreComplejo: nombre,
+            cantidadCanchas: parseInt(cant),
+            gananciaNeta: 0,
+            comisionGilda: 0
+        });
+        alert("¡Registro exitoso! Verifica tu email para activar tu cuenta.");
+        location.reload();
+    } catch (e) { alert("Error: " + e.message); }
+}
+
+async function loginDueno() {
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-pass').value;
+    try {
+        const userCred = await window.signIn(window.auth, email, pass);
+        if(!userCred.user.emailVerified) return alert("Por favor, verifica tu email primero.");
+        
+        const docSnap = await window.getDoc(window.doc(window.db, "propietarios", userCred.user.uid));
+        cantCanchasGlobal = docSnap.data().cantidadCanchas;
+        
+        document.getElementById('view-dueno-acceso').style.display = 'none';
+        document.getElementById('view-dueno-menu').style.display = 'block';
+        document.getElementById('total-neto-dueno').innerText = `$${docSnap.data().gananciaNeta.toLocaleString()}`;
+        generarCanchasPropietario(cantCanchasGlobal);
+    } catch (e) { alert("Error al ingresar. Revisa tus datos."); }
+}
+
+function generarCanchasPropietario(cant) {
+    const cont = document.getElementById('contenedor-mis-canchas');
+    cont.innerHTML = '';
+    for(let i=1; i<=cant; i++){
+        cont.innerHTML += `
+            <div class="setup-card" style="margin-bottom:15px">
+                <h4>Cancha #${i}</h4>
+                <input placeholder="Nombre de la cancha">
+                <input type="number" placeholder="Precio por hora ($)">
+            </div>`;
+    }
+}
+
+// --- JUGADOR: MARKETPLACE ---
 function renderMarketplace() {
     const list = document.getElementById('pedidosya-list');
-    const canchas = [
-        {id: 1, nombre: "El Potrero", stars: "4.9", precio: 15000, img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=500", direccion: "Av. Balloffet 500"},
-        {id: 2, nombre: "San Martín Fútbol", stars: "4.5", precio: 12000, img: "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?q=80&w=500", direccion: "Calle San Martín 200"}
+    const locales = [
+        {n: "El Potrero", p: 15000, img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=500", dir: "Av. Balloffet 500"},
+        {n: "San Martín Fútbol", p: 12000, img: "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?q=80&w=500", dir: "Calle San Martín 200"}
     ];
-
-    list.innerHTML = canchas.map(c => `
-        <div class="py-card" onclick="verDetalleCancha('${c.nombre}', ${c.precio}, '${c.direccion}', '${c.img}')">
-            <div class="py-img" style="background-image: url('${c.img}')">
+    list.innerHTML = locales.map(l => `
+        <div class="py-card" onclick="verDetalle('${l.n}', ${l.p}, '${l.img}', '${l.dir}')">
+            <div class="py-img" style="background-image:url('${l.img}')">
                 <span class="py-tag">Anticipo 30%</span>
             </div>
             <div class="py-info">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-weight:800; font-size:1.1rem">${c.nombre}</span>
-                    <span class="py-rating">⭐ ${c.stars}</span>
-                </div>
-                <p style="color:gray; font-size:0.8rem; margin:5px 0;">San Rafael • $${c.precio.toLocaleString()}/hr</p>
+                <h3>${l.n}</h3>
+                <p>San Rafael • $${l.p.toLocaleString()}/hr • ⭐ 4.9</p>
             </div>
-        </div>
-    `).join('');
+        </div>`).join('');
 }
 
-// --- VISTA DETALLE JUGADOR ---
-function verDetalleCancha(nombre, precio, direccion, img) {
-    canchaSeleccionada = { nombre, precio, direccion };
+function verDetalle(n, p, img, dir) {
+    canchaSeleccionada = {n, p, dir};
     document.getElementById('view-cliente').style.display = 'none';
     document.getElementById('view-cancha-detalle').style.display = 'block';
-    
-    document.getElementById('det-nombre').innerText = nombre;
-    document.getElementById('det-precio').innerText = `$${precio.toLocaleString()}`;
-    document.getElementById('det-anticipo').innerText = `$${(precio * 0.3).toLocaleString()}`;
+    document.getElementById('det-nombre').innerText = n;
+    document.getElementById('det-precio').innerText = `$${p.toLocaleString()}`;
+    document.getElementById('det-anticipo').innerText = `Anticipo 30%: $${(p*0.3).toLocaleString()}`;
     document.querySelector('.detalle-img').style.backgroundImage = `url('${img}')`;
     
-    // Configurar botón Google Maps
-    document.getElementById('btn-google-maps').onclick = () => {
-        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(nombre + " " + direccion + " San Rafael")}`, '_blank');
+    document.getElementById('btn-maps-link').onclick = () => {
+        window.open(`https://www.google.com/maps/search/${encodeURIComponent(n + " " + dir + " San Rafael")}`, '_blank');
     };
-
-    renderCalendarioReserva();
 }
 
-function renderCalendarioReserva() {
-    const cal = document.getElementById('calendario-reserva');
-    const horas = ["18:00", "19:00", "20:00", "21:00", "22:00", "23:00"];
-    cal.innerHTML = horas.map(h => `<div class="time-slot" onclick="seleccionarHora(this)">${h}</div>`).join('');
-}
-
-function seleccionarHora(el) {
+function seleccionarTurno(el) {
     document.querySelectorAll('.time-slot').forEach(t => t.classList.remove('selected'));
     el.classList.add('selected');
 }
 
-// --- PROCESAR RESERVA (GILDA 5%) ---
-function procesarReservaJugador() {
+function procesarReserva() {
     const hora = document.querySelector('.time-slot.selected');
-    if(!hora) return alert("Por favor, selecciona un horario.");
-
-    let montoTotal = canchaSeleccionada.precio;
-    let comisionGilda = montoTotal * 0.05; // TU PARTE INVISIBLE
-
-    totalGildaComision += comisionGilda; // Se suma a tu panel secreto
-
-    alert(`¡Reserva confirmada en ${canchaSeleccionada.nombre} a las ${hora.innerText}!\n\nDeberás pagar el anticipo al dueño para asegurar tu lugar.`);
-    cerrarDetalle();
-}
-
-function cerrarDetalle() {
-    document.getElementById('view-cancha-detalle').style.display = 'none';
-    document.getElementById('view-cliente').style.display = 'block';
+    if(!hora) return alert("Elige un horario.");
+    
+    // Tu 5% invisible
+    totalGildaComision += (canchaSeleccionada.p * 0.05);
+    
+    const msj = `¡Hola! Quiero reservar en ${canchaSeleccionada.n} a las ${hora.innerText}. Sé que el anticipo es de $${canchaSeleccionada.p * 0.3}.`;
+    window.open(`https://wa.me/5492604000000?text=${encodeURIComponent(msj)}`, '_blank');
 }
 
 // --- PANEL SECRETO GILDA ---
@@ -99,4 +143,19 @@ function trucoAdmin() {
         document.getElementById('plata-gilda').innerText = `$${totalGildaComision.toLocaleString()}`;
         clicksLogo = 0;
     }
+}
+
+// UTILIDADES
+function abrirSeccion(sec) {
+    document.querySelector('.menu-grid').style.display = 'none';
+    document.querySelectorAll('.seccion-detalle').forEach(s => s.style.display = 'none');
+    document.getElementById(`sec-${sec}`).style.display = 'block';
+}
+function volverMenu() {
+    document.querySelector('.menu-grid').style.display = 'grid';
+    document.querySelectorAll('.seccion-detalle').forEach(s => s.style.display = 'none');
+}
+function cerrarDetalle() {
+    document.getElementById('view-cancha-detalle').style.display = 'none';
+    document.getElementById('view-cliente').style.display = 'block';
 }
