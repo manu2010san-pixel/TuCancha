@@ -1,36 +1,39 @@
 :root {
-    --pasto: #27ae60;
+    --verde-pasto: #27ae60;
     --verde-lima: #2ecc71;
-    --cal: rgba(255, 255, 255, 0.1);
+    --negro: #2c3e50;
+    --blanco: #ffffff;
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
-    margin: 0;
-    background-color: var(--pasto);
-    background-image: 
-        linear-gradient(var(--cal) 1px, transparent 1px),
-        linear-gradient(90deg, var(--cal) 1px, transparent 1px);
-    background-size: 40px 40px;
-    min-height: 100vh;
+    font-family: 'Poppins', sans-serif; margin: 0; background-color: var(--verde-pasto);
+    background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 60px 60px;
 }
 
+/* Efecto Pelotas de Fútbol */
 body::after {
-    content: '⚽'; position: fixed; bottom: 10px; right: 10px; font-size: 60px; opacity: 0.1;
+    content: '⚽'; position: fixed; bottom: -20px; right: -20px; font-size: 150px; opacity: 0.05; z-index: -1;
 }
 
-.view-inicial { height: 100vh; display: flex; justify-content: center; align-items: center; }
-.welcome-content { background: white; padding: 40px; border-radius: 40px; text-align: center; width: 85%; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-
-header { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-.logo-container { color: var(--verde-lima); font-weight: 800; cursor: pointer; }
-
-.py-card { background: white; border-radius: 20px; overflow: hidden; margin-bottom: 15px; }
-.py-img { height: 120px; background: #333 url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=500') center/cover; }
+/* ESTILO PEDIDOSYA */
+.py-card { background: white; border-radius: 20px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); cursor: pointer; }
+.py-img { height: 160px; background: #333 center/cover; position: relative; }
+.py-tag { position: absolute; top: 15px; left: 15px; background: var(--verde-lima); color: white; padding: 5px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; }
 .py-info { padding: 15px; }
+.py-rating { background: #fff8e1; color: #ffa000; padding: 2px 8px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; display: inline-block; }
 
+/* DETALLE CANCHA */
+#view-cancha-detalle { background: white; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 1000; overflow-y: auto; }
+.detalle-img { height: 250px; background: url('https://images.unsplash.com/photo-1529900748604-07564a03e7a6?q=80&w=1000') center/cover; }
+.detalle-content { padding: 25px; border-radius: 30px 30px 0 0; margin-top: -30px; background: white; }
+.btn-back { background: rgba(0,0,0,0.5); color: white; border: none; padding: 10px 15px; border-radius: 20px; position: absolute; top: 20px; left: 20px; }
+.btn-maps { width: 100%; padding: 12px; border: 2px solid var(--verde-pasto); border-radius: 12px; background: transparent; color: var(--verde-pasto); font-weight: bold; margin-top: 10px; cursor: pointer; }
+
+/* GENERAL */
 .container { max-width: 450px; margin: 0 auto; padding: 20px; }
-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; }
-.btn-primary { width: 100%; padding: 15px; background: var(--verde-lima); color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; }
-
-.admin-panel-card { background: white; padding: 30px; border-radius: 30px; border: 5px solid #f1c40f; text-align: center; }
+.btn-primary { width: 100%; padding: 16px; background: var(--verde-lima); color: white; border: none; border-radius: 15px; font-weight: 800; cursor: pointer; font-size: 1rem; }
+input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; }
+.calendar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
+.time-slot { padding: 12px; border-radius: 10px; text-align: center; background: #f0f0f0; font-weight: bold; cursor: pointer; }
+.time-slot.selected { background: var(--verde-lima); color: white; }
