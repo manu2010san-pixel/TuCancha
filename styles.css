@@ -6,9 +6,9 @@
 }
 
 body {
-    font-family: 'Poppins', sans-serif; margin: 0;
+    font-family: 'Poppins', sans-serif; 
+    margin: 0;
     background-color: var(--verde-pasto);
-    /* LÍNEAS DE CANCHA PROFESIONAL */
     background-image: 
         radial-gradient(circle at center, transparent 140px, var(--blanco) 141px, transparent 143px),
         linear-gradient(var(--blanco) 2px, transparent 2px),
@@ -53,3 +53,4 @@ input, select { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #d
 /* PANEL ADMIN SECRETO */
 .admin-panel-card { background: white; padding: 40px; border-radius: 40px; border: 5px solid #f1c40f; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
 .stat-item h1 { color: var(--verde-lima); font-size: 3rem; margin: 10px 0; }
+
