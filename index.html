@@ -10,23 +10,26 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // --- CONFIGURACIÓN DE FIREBASE (PEGA TUS DATOS AQUÍ) ---
         const firebaseConfig = {
-            apiKey: "TU_API_KEY",
-            authDomain: "tucancha.firebaseapp.com",
-            projectId: "tucancha",
-            storageBucket: "tucancha.appspot.com",
-            messagingSenderId: "XXXX",
-            appId: "XXXX"
+            apiKey: "AQUÍ_PEGA_TU_API_KEY_REAL",
+            authDomain: "tucancha-tu-id.firebaseapp.com",
+            projectId: "tucancha-tu-id",
+            storageBucket: "tucancha-tu-id.appspot.com",
+            messagingSenderId: "TU_SENDER_ID",
+            appId: "TU_APP_ID"
         };
+        // -------------------------------------------------------
 
         const app = initializeApp(firebaseConfig);
         window.auth = getAuth(app);
         window.db = getFirestore(app);
         window.createUser = createUserWithEmailAndPassword;
         window.signIn = signInWithEmailAndPassword;
+        window.sendEmailVerif = sendEmailVerification;
         window.doc = doc; window.setDoc = setDoc; window.getDoc = getDoc; window.updateDoc = updateDoc; window.increment = increment;
     </script>
 </head>
@@ -53,9 +56,9 @@
 
     <div id="view-dueno-acceso" class="view" style="display: none;">
         <div id="selector-acceso" class="setup-card">
-            <h2>Bienvenido</h2>
-            <button class="btn-primary" onclick="mostrarLogin()">Ingresar a mi cuenta</button>
-            <button class="btn-primary" style="background:#2c3e50; margin-top:10px;" onclick="mostrarRegistro()">Registrar mi Complejo</button>
+            <h2>Gestión de Complejos</h2>
+            <button class="btn-primary" onclick="mostrarLogin()">Ingresar</button>
+            <button class="btn-primary" style="background:#2c3e50; margin-top:10px;" onclick="mostrarRegistro()">Registrarme</button>
         </div>
 
         <div id="form-login" class="setup-card" style="display: none;">
@@ -71,29 +74,31 @@
                 <button class="btn-primary" onclick="nextStep(2)">Continuar</button>
             </div>
             <div id="step-2" class="setup-card" style="display: none;">
-                <h2>Paso 2: Clave</h2><input type="password" id="owner-pass" placeholder="Crea tu clave">
+                <h2>Paso 2: Verificación</h2>
+                <p>Te enviaremos un link de confirmación al finalizar.</p>
+                <input type="text" placeholder="Código visual" class="code-input">
                 <button class="btn-primary" onclick="nextStep(3)">Siguiente</button>
             </div>
             <div id="step-3" class="setup-card" style="display: none;">
-                <h2>Paso 3: Complejo</h2>
-                <input type="text" id="complex-name" placeholder="Nombre">
-                <input type="number" id="complex-qty" placeholder="Cant. Canchas">
-                <button class="btn-primary" onclick="nextStep(4)">Siguiente</button>
+                <h2>Paso 3: Seguridad</h2><input type="password" id="owner-pass" placeholder="Crea tu clave">
+                <button class="btn-primary" onclick="nextStep(4)">Definir Clave</button>
             </div>
             <div id="step-4" class="setup-card" style="display: none;">
-                <h2>Paso 4: Cancha</h2>
+                <h2>Paso 4: Tu Complejo</h2>
+                <input type="text" id="complex-name" placeholder="Nombre">
+                <input type="number" id="complex-qty" placeholder="Cant. Canchas">
+                <button class="btn-primary" onclick="nextStep(5)">Siguiente</button>
+            </div>
+            <div id="step-5" class="setup-card" style="display: none;">
+                <h2>Paso 5: Detalles</h2>
                 <input type="number" id="cancha-valor" placeholder="Valor hora ($)">
                 <select id="cancha-suelo">
                     <option value="Sintético">Césped Sintético</option>
                     <option value="Natural">Césped Natural</option>
                     <option value="Tierra">Tierra</option>
                 </select>
-                <button class="btn-primary" onclick="nextStep(5)">Siguiente</button>
-            </div>
-            <div id="step-5" class="setup-card" style="display: none;">
-                <h2>Paso 5: Billetera</h2>
                 <input type="text" id="billetera-dato" placeholder="Alias, CBU o CVU">
-                <button class="btn-primary" onclick="finalizarRegistroReal()">Finalizar</button>
+                <button class="btn-primary" onclick="finalizarRegistroReal()">Finalizar y Verificar</button>
             </div>
         </div>
     </div>
@@ -106,36 +111,35 @@
             <button class="menu-item" onclick="abrirSeccion('pagos')"><i class="fas fa-wallet"></i><span>Pagos</span></button>
         </div>
         <div id="sec-pagos" class="seccion-detalle" style="display: none;">
-            <div class="panel-stats"><p>Ganancia Neta</p><h2 id="total-neto-dueno">$0</h2></div>
+            <div class="panel-stats"><p>Ganancia Neta (95%)</p><h2 id="total-neto-dueno">$0</h2></div>
             <button class="btn-primary" onclick="volverMenu()">Volver</button>
         </div>
     </div>
 
     <div id="view-cliente" class="view" style="display: none;">
-        <div class="marketplace-header"><h2>San Rafael</h2><div class="search-bar">Buscar canchas...</div></div>
+        <div class="marketplace-header"><h2>Canchas en San Rafael</h2><div class="search-bar">Buscar...</div></div>
         <div id="pedidosya-list"></div>
     </div>
 
     <div id="view-cancha-detalle" class="view" style="display: none;">
         <div class="detalle-header">
-            <button class="btn-back" onclick="cerrarDetalle()"><i class="fas fa-arrow-left"></i></button>
+            <button class="btn-back" onclick="cerrarDetalle()"><i class="fas fa-arrow-left"></i> Volver</button>
             <div class="detalle-img"></div>
         </div>
         <div class="detalle-info">
-            <h2 id="det-nombre">Nombre de Cancha</h2>
-            <div class="py-rating" id="det-stars">⭐ 5.0</div>
-            <p id="det-suelo">Césped Sintético</p>
+            <h2 id="det-nombre">Nombre</h2>
+            <p id="det-suelo">Suelo</p>
             <div class="price-box">Valor Hora: <strong id="det-precio">$0</strong></div>
             <hr>
-            <h3>Selecciona Horario</h3>
+            <h3>Horarios Disponibles</h3>
             <div class="calendar-grid">
                 <div class="time-slot available" onclick="seleccionarTurno(this)">18:00</div>
                 <div class="time-slot busy">19:00</div>
                 <div class="time-slot available" onclick="seleccionarTurno(this)">20:00</div>
             </div>
             <div class="sticky-footer">
-                <p id="txt-anticipo">Anticipo requerido (30%): $0</p>
-                <button class="btn-primary" onclick="procesarReserva()">PAGAR ANTICIPO</button>
+                <p id="txt-anticipo">Anticipo (30%): $0</p>
+                <button class="btn-primary" onclick="procesarReserva()">RESERVAR Y PAGAR</button>
             </div>
         </div>
     </div>
@@ -146,10 +150,9 @@
             <div class="admin-stats">
                 <div class="stat-item"><p>Mi 5% Acumulado</p><h1 id="plata-gilda">$0</h1></div>
             </div>
-            <button class="btn-primary" onclick="location.reload()">Salir</button>
+            <button class="btn-primary" onclick="location.reload()">Cerrar Panel</button>
         </div>
     </div>
-
 </div>
 
 <script src="script.js"></script>
