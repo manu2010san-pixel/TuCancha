@@ -1,38 +1,31 @@
-let viewStack = ['view-inicio']; // Historial para el botón atrás
+let viewStack = ['view-inicio']; 
 let totalGildaComision = 0;
 let clicksLogo = 0;
 let canchaSeleccionada = {};
 
 // --- NAVEGACIÓN ---
 function cambiarVista(nuevaVista, textoRol = null) {
-    // Ocultar todas las vistas
     document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
-    
-    // Mostrar la nueva
     document.getElementById(nuevaVista).style.display = 'block';
     
-    // Guardar en el historial si no es la misma que la anterior
     if (viewStack[viewStack.length - 1] !== nuevaVista) {
         viewStack.push(nuevaVista);
     }
 
-    // Botón atrás visible solo si no estamos en el inicio
     const btnAtras = document.getElementById('btn-atras-global');
     btnAtras.style.visibility = (nuevaVista === 'view-inicio') ? 'hidden' : 'visible';
 
-    // Actualizar Badge
     if (textoRol) document.getElementById('indicador-rol').innerText = textoRol;
 }
 
 function navegarAtras() {
     if (viewStack.length > 1) {
-        viewStack.pop(); // Sacar la actual
+        viewStack.pop(); 
         const anterior = viewStack[viewStack.length - 1];
         
         document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
         document.getElementById(anterior).style.display = 'block';
         
-        // Ocultar botón si volvimos al inicio
         if (anterior === 'view-inicio') {
             document.getElementById('btn-atras-global').style.visibility = 'hidden';
             document.getElementById('indicador-rol').innerText = "INICIO";
@@ -40,44 +33,36 @@ function navegarAtras() {
     }
 }
 
-// --- VALIDACIONES ESTRICTAS REGISTRO ---
+// --- VALIDACIÓN ESTRICTA ---
 function validarPaso(actual, siguiente) {
     if (actual === 1) {
         const email = document.getElementById('reg-email').value;
-        if (!email.includes("@")) return alert("Introduce un correo válido.");
+        if (!email.includes("@")) return alert("Por favor, introducí un correo válido.");
     }
     if (actual === 2) {
         const pass = document.getElementById('reg-pass').value;
-        if (pass.length < 6) return alert("La contraseña debe tener 6 caracteres.");
+        if (pass.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
     }
     if (actual === 3) {
         const nom = document.getElementById('reg-nombre').value;
         const cant = document.getElementById('reg-cantidad').value;
-        if (!nom || cant <= 0) return alert("Nombre y cantidad obligatorios.");
+        if (!nom || cant <= 0) return alert("Completá el nombre del complejo y la cantidad de canchas.");
     }
-    
     document.getElementById(`step-${actual}`).style.display = 'none';
     document.getElementById(`step-${siguiente}`).style.display = 'block';
 }
 
-// --- FIREBASE: PROPIETARIO ---
+// --- FIREBASE ---
 async function finalizarRegistro() {
-    const email = document.getElementById('reg-email').value;
-    const pass = document.getElementById('reg-pass').value;
-    const nombre = document.getElementById('reg-nombre').value;
     const billetera = document.getElementById('reg-billetera').value;
-
-    if (!billetera) return alert("Dato de cobro obligatorio.");
-
+    if (!billetera) return alert("Necesitamos tu Alias o CBU para los pagos.");
+    
     try {
+        const email = document.getElementById('reg-email').value;
+        const pass = document.getElementById('reg-pass').value;
         const userCred = await window.createUser(window.auth, email, pass);
         await window.sendEmailVerif(window.auth.currentUser);
-        await window.setDoc(window.doc(window.db, "propietarios", userCred.user.uid), {
-            nombreComplejo: nombre,
-            cantidadCanchas: parseInt(document.getElementById('reg-cantidad').value),
-            gananciaNeta: 0
-        });
-        alert("¡Éxito! Verifica tu email para activar la cuenta.");
+        alert("¡Registro enviado! Revisá tu email para verificar la cuenta antes de entrar.");
         location.reload();
     } catch (e) { alert(e.message); }
 }
@@ -87,20 +72,16 @@ async function loginPropietario() {
     const pass = document.getElementById('login-pass').value;
     try {
         const userCred = await window.signIn(window.auth, email, pass);
-        if(!userCred.user.emailVerified) return alert("Verifica tu email primero.");
-        
-        const docSnap = await window.getDoc(window.doc(window.db, "propietarios", userCred.user.uid));
-        cambiarVista('view-propietario-menu', 'PROPIETARIO');
-        document.getElementById('txt-ganancia').innerText = `$${docSnap.data().gananciaNeta.toLocaleString()}`;
-        generarCanchas(docSnap.data().cantidadCanchas);
-    } catch (e) { alert("Error al ingresar."); }
+        if(!userCred.user.emailVerified) return alert("Primero verificá tu email con el link que te enviamos.");
+        alert("¡Bienvenido al panel de Propietario!");
+    } catch (e) { alert("Datos incorrectos o configuración pendiente."); }
 }
 
 async function recuperarClave() {
     const email = document.getElementById('reset-email').value;
     try {
         await window.sendResetEmail(window.auth, email);
-        alert("Correo enviado.");
+        alert("Te enviamos un link para cambiar tu contraseña.");
         cambiarVista('view-propietario-login');
     } catch (e) { alert(e.message); }
 }
@@ -108,44 +89,34 @@ async function recuperarClave() {
 // --- JUGADOR ---
 function renderMarketplace() {
     const list = document.getElementById('market-list');
-    const locales = [{n: "El Potrero", p: 15000, img: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=500"}, {n: "San Martín", p: 12000, img: "https://images.unsplash.com/photo-1529900748604-07564a03e7a6?q=80&w=500"}];
-    list.innerHTML = locales.map(l => `
-        <div class="py-card" onclick="verDetalle('${l.n}', ${l.p}, '${l.img}')">
-            <div class="py-img" style="background-image:url('${l.img}')"><span class="py-tag">Seña 30%</span></div>
-            <div class="py-info"><h3>${l.n}</h3><p>San Rafael • $${l.p}/hr</p></div>
+    const items = [{n: "Canchas El Potrero", p: 15000}, {n: "San Martín Fútbol", p: 12000}];
+    list.innerHTML = items.map(i => `
+        <div class="py-card" onclick="verDetalle('${i.n}', ${i.p})">
+            <div class="py-img"><span class="py-tag">Seña 30%</span></div>
+            <div class="py-info"><h3>${i.n}</h3><p>San Rafael • $${i.p}/hr</p></div>
         </div>`).join('');
 }
 
-function verDetalle(n, p, img) {
+function verDetalle(n, p) {
     canchaSeleccionada = {n, p};
     cambiarVista('view-jugador-detalle', 'JUGADOR');
     document.getElementById('det-nombre').innerText = n;
-    document.getElementById('det-anticipo').innerText = `Seña (30%): $${(p * 0.3).toLocaleString()}`;
-    document.getElementById('det-img').style.backgroundImage = `url('${img}')`;
+    document.getElementById('det-anticipo').innerText = `Seña (30%): $${p * 0.3}`;
 }
 
 function reservarWhatsApp() {
     const turno = document.querySelector('.time-slot.selected');
-    if(!turno) return alert("Elige un horario.");
+    if(!turno) return alert("Elegí un horario.");
     totalGildaComision += (canchaSeleccionada.p * 0.05);
     window.open(`https://wa.me/5492604000000?text=Hola! Quiero reservar en ${canchaSeleccionada.n} a las ${turno.innerText}`, '_blank');
 }
 
-// --- UTILIDADES ---
-function generarCanchas(cant) {
-    const cont = document.getElementById('listado-canchas');
-    cont.innerHTML = '';
-    for(let i=1; i<=cant; i++) cont.innerHTML += `<div class="card-field" style="margin-bottom:10px"><h4>Cancha #${i}</h4><input placeholder="Nombre"><input type="number" placeholder="Precio"></div>`;
-}
-function abrirSeccion(id) {
-    document.querySelector('.menu-grid').style.display = 'none';
-    document.querySelectorAll('.seccion-detalle').forEach(s => s.style.display = 'none');
-    document.getElementById(`sec-${id}`).style.display = 'block';
-}
+// --- OTROS ---
 function seleccionarTurno(el) {
     document.querySelectorAll('.time-slot').forEach(t => t.classList.remove('selected'));
     el.classList.add('selected');
 }
+
 function trucoAdmin() {
     clicksLogo++;
     if(clicksLogo === 5) {
