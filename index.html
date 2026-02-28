@@ -14,12 +14,12 @@
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyDVWhCOgmStnM14QTHdmrmEzVKQKPTtM-Q",
-            authDomain: "tucancha-sanrafael.firebaseapp.com",
-            projectId: "tucancha-sanrafael",
-            storageBucket: "tucancha-sanrafael.appspot.com",
-            messagingSenderId: "000000000",
-            appId: "1:000000:web:abcdef"
+            apiKey: "AIzaSyDVWhCOgmStnM14QTHdmrmEzVKQKPTtM-Q", // <--- PEGA TU CLAVE REAL ACÁ
+            authDomain: "tucancha-58841.firebaseapp.com",
+            projectId: "tucancha-58841",
+            storageBucket: "tucancha-58841.appspot.com",
+            messagingSenderId: "588417758908",
+            appId: "TU_APP_ID_REAL"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -49,7 +49,7 @@
     <div id="view-inicio" class="view">
         <div class="welcome-content card-field">
             <div class="logo-hero"><i class="fas fa-futbol fa-4x"></i><h1>TuCancha</h1></div>
-            <p>San Rafael, Mendoza</p>
+            <p style="font-weight: 800; color: #1B5E20;">SAN RAFAEL, MENDOZA</p>
             <div class="selector-roles">
                 <button class="card-role card-field" onclick="cambiarVista('view-jugador-market', 'JUGADOR')">
                     <i class="fas fa-running fa-2x"></i><span>Jugador</span>
@@ -63,9 +63,9 @@
 
     <div id="view-propietario-acceso" class="view" style="display: none;">
         <div class="setup-card card-field">
-            <h2>Panel de Propietarios</h2>
-            <button class="btn-dark-green" onclick="cambiarVista('view-propietario-login')">Entrar a mi cuenta</button>
-            <button class="btn-outline" onclick="cambiarVista('view-propietario-registro')">Registrar Complejo</button>
+            <h2>Panel Propietarios</h2>
+            <button class="btn-dark-green" onclick="cambiarVista('view-propietario-login')">Entrar</button>
+            <button class="btn-outline" onclick="cambiarVista('view-propietario-registro')">Nuevo Registro</button>
         </div>
     </div>
 
@@ -75,14 +75,14 @@
             <input type="email" id="login-email" placeholder="Email">
             <input type="password" id="login-pass" placeholder="Contraseña">
             <button class="btn-dark-green" onclick="loginPropietario()">Entrar</button>
-            <p class="link-text" onclick="cambiarVista('view-propietario-reset')">¿Olvidaste tu contraseña?</p>
+            <p class="link-text" onclick="cambiarVista('view-propietario-reset')">Olvidé mi contraseña</p>
         </div>
     </div>
 
     <div id="view-propietario-reset" class="view" style="display: none;">
         <div class="setup-card card-field">
             <h2>Recuperar Clave</h2>
-            <p>Te enviaremos un link a tu correo.</p>
+            <p>Se enviará un link a tu correo.</p>
             <input type="email" id="reset-email" placeholder="Email">
             <button class="btn-dark-green" onclick="recuperarClave()">Enviar Link</button>
         </div>
@@ -95,8 +95,8 @@
             <button class="btn-dark-green" onclick="validarPaso(1, 2)">Siguiente</button>
         </div>
         <div id="step-2" class="setup-card card-field" style="display: none;">
-            <h3>Paso 2: Seguridad</h3>
-            <input type="password" id="reg-pass" placeholder="Clave (mín. 6 caracteres)">
+            <h3>Paso 2: Contraseña</h3>
+            <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres">
             <button class="btn-dark-green" onclick="validarPaso(2, 3)">Siguiente</button>
         </div>
         <div id="step-3" class="setup-card card-field" style="display: none;">
@@ -108,21 +108,7 @@
         <div id="step-4" class="setup-card card-field" style="display: none;">
             <h3>Paso 4: Cobros</h3>
             <input type="text" id="reg-billetera" placeholder="Alias o CBU">
-            <button class="btn-dark-green" onclick="finalizarRegistro()">Finalizar y Verificar</button>
-        </div>
-    </div>
-
-    <div id="view-propietario-menu" class="view" style="display: none;">
-        <div class="menu-grid">
-            <button class="menu-item card-field" onclick="abrirSeccion('canchas')"><i class="fas fa-futbol"></i><span>Mis Canchas</span></button>
-            <button class="menu-item card-field" onclick="abrirSeccion('pagos')"><i class="fas fa-wallet"></i><span>Pagos</span></button>
-        </div>
-        <div id="sec-canchas" class="seccion-detalle" style="display: none;">
-            <h3>Mis Canchas</h3>
-            <div id="listado-canchas"></div>
-        </div>
-        <div id="sec-pagos" class="seccion-detalle" style="display: none;">
-            <div class="panel-stats card-field"><p>Ganancia Neta (95%)</p><h2 id="txt-ganancia">$0</h2></div>
+            <button class="btn-dark-green" onclick="finalizarRegistro()">Finalizar Registro</button>
         </div>
     </div>
 
@@ -134,14 +120,13 @@
     <div id="view-jugador-detalle" class="view" style="display: none;">
         <div class="detalle-img" id="det-img"></div>
         <div class="detalle-info card-field">
-            <h2 id="det-nombre">Nombre</h2>
+            <h2 id="det-nombre">Cancha</h2>
             <hr>
             <div class="calendar-grid">
                 <div class="time-slot card-field available" onclick="seleccionarTurno(this)">19:00</div>
-                <div class="time-slot card-field busy">20:00</div>
                 <div class="time-slot card-field available" onclick="seleccionarTurno(this)">21:00</div>
             </div>
-            <p id="det-anticipo">Anticipo: $0</p>
+            <p id="det-anticipo" style="font-weight: bold;">Seña (30%): $0</p>
             <button class="btn-dark-green" onclick="reservarWhatsApp()">RESERVAR POR WHATSAPP</button>
         </div>
     </div>
@@ -149,8 +134,7 @@
     <div id="view-admin-gilda" class="view" style="display: none;">
         <div class="admin-card card-field">
             <h2>Panel Admin Gilda</h2>
-            <p>Comisiones del 5%</p>
-            <h1 id="txt-gilda">$0</h1>
+            <h1 id="txt-gilda" style="color: #1B5E20; font-size: 3rem;">$0</h1>
             <button class="btn-outline" onclick="location.reload()">Cerrar</button>
         </div>
     </div>
@@ -160,4 +144,3 @@
 <script src="script.js"></script>
 </body>
 </html>
-
