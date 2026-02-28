@@ -1,38 +1,36 @@
 :root {
-    --verde-pasto: #2E7D32;
-    --verde-oscuro: #1B5E20;
+    --verde-campo: #2E7D32;
+    --verde-boton: #1B5E20;
     --blanco: #ffffff;
     --negro: #000000;
 }
 
 body {
     font-family: 'Poppins', sans-serif; margin: 0;
-    background-color: var(--verde-pasto);
+    background-color: var(--verde-campo);
     background-image: linear-gradient(rgba(255,255,255,0.05) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,0.05) 2px, transparent 2px);
-    background-size: 50px 50px;
+    background-size: 60px 60px;
     min-height: 100vh;
 }
 
-/* Patrón de pelotas */
-body::after {
-    content: '⚽ ⚽ ⚽'; position: fixed; bottom: 20px; right: 20px; font-size: 50px; opacity: 0.1; z-index: -1;
-}
+body::after { content: '⚽'; position: fixed; bottom: 20px; right: 20px; font-size: 60px; opacity: 0.1; z-index: -1; }
 
 .container { max-width: 450px; margin: 0 auto; padding: 20px; }
 
-/* ESTILO "CANCHA" (Bordes dobles: Negro exterior, Blanco interior) */
+/* BORDE DOBLE NEGRO Y BLANCO */
 .card-field {
     background: var(--blanco);
-    border: 3px solid var(--negro);
-    box-shadow: inset 0 0 0 3px var(--blanco), inset 0 0 0 6px var(--negro); /* Efecto líneas de cal */
-    border-radius: 15px;
-    padding: 20px;
+    border: 4px solid var(--negro);
+    box-shadow: inset 0 0 0 3px var(--blanco), inset 0 0 0 7px var(--negro);
+    border-radius: 20px;
+    padding: 25px;
     box-sizing: border-box;
+    text-align: center;
 }
 
 header {
     background: var(--blanco); padding: 15px; display: flex; align-items: center; 
-    border-bottom: 4px solid var(--negro); position: sticky; top: 0; z-index: 1000;
+    border-bottom: 5px solid var(--negro); position: sticky; top: 0; z-index: 1000;
 }
 
 .btn-atras {
@@ -40,14 +38,14 @@ header {
     width: 40px; height: 40px; border-radius: 50%; cursor: pointer; margin-right: 15px;
 }
 
-.logo-container { color: var(--verde-oscuro); font-weight: 900; font-size: 1.2rem; cursor: pointer; flex-grow: 1; text-align: center; }
-.badge-rol { background: var(--negro); color: var(--blanco); padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; border: 2px solid var(--blanco); }
+.logo-container { color: var(--verde-boton); font-weight: 900; font-size: 1.2rem; cursor: pointer; flex-grow: 1; text-align: center; }
+.badge-rol { background: var(--negro); color: var(--blanco); padding: 5px 15px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
 
-/* BOTONES VERDE OSCURO */
+/* BOTÓN VERDE OSCURO */
 .btn-dark-green {
-    width: 100%; padding: 15px; background: var(--verde-oscuro); color: var(--blanco);
-    border: 3px solid var(--negro); border-radius: 12px; font-weight: 900; cursor: pointer;
-    box-shadow: 3px 3px 0px var(--blanco); margin-bottom: 10px;
+    width: 100%; padding: 18px; background: var(--verde-boton); color: var(--blanco);
+    border: 4px solid var(--negro); border-radius: 15px; font-weight: 900; cursor: pointer;
+    box-shadow: 4px 4px 0px var(--blanco); margin-bottom: 12px;
 }
 
 .btn-outline {
@@ -56,20 +54,14 @@ header {
 }
 
 input {
-    width: 100%; padding: 12px; margin: 10px 0; border: 3px solid var(--negro);
-    border-radius: 10px; box-sizing: border-box; font-family: 'Poppins'; font-weight: bold;
+    width: 100%; padding: 15px; margin: 10px 0; border: 3px solid var(--negro);
+    border-radius: 12px; font-family: 'Poppins'; font-weight: bold;
 }
 
-/* MARKETPLACE */
-.py-card { background: var(--blanco); border-radius: 20px; border: 3px solid var(--negro); overflow: hidden; margin-bottom: 20px; cursor: pointer; }
-.py-img { height: 140px; background: #333 url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=500') center/cover; position: relative; }
-.py-tag { position: absolute; top: 10px; left: 10px; background: var(--negro); color: var(--blanco); padding: 5px 10px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; border: 1px solid var(--blanco); }
+.py-card { background: var(--blanco); border: 4px solid var(--negro); border-radius: 25px; overflow: hidden; margin-bottom: 20px; cursor: pointer; }
+.py-img { height: 160px; background: #333 url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=500') center/cover; position: relative; }
+.py-tag { position: absolute; top: 12px; left: 12px; background: var(--negro); color: var(--blanco); padding: 5px 10px; border-radius: 8px; font-weight: 900; font-size: 0.7rem; border: 1px solid var(--blanco); }
 
-.calendar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
-.time-slot { padding: 10px; text-align: center; font-weight: bold; cursor: pointer; background: #eee; }
-.available.selected { background: var(--verde-oscuro); color: var(--blanco); border-color: var(--blanco); }
-
-.welcome-content { text-align: center; }
-.selector-roles { display: flex; gap: 10px; margin-top: 20px; }
-.card-role { flex: 1; cursor: pointer; text-align: center; padding: 15px 5px; }
-.link-text { color: var(--verde-oscuro); text-align: center; cursor: pointer; margin-top: 15px; font-weight: bold; text-decoration: underline; }
+.selector-roles { display: flex; gap: 15px; margin-top: 30px; }
+.card-role { flex: 1; padding: 25px 10px; }
+.link-text { color: var(--verde-boton); font-weight: 900; text-decoration: underline; cursor: pointer; margin-top: 15px; display: block; }
