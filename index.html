@@ -4,23 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TuCancha - San Rafael</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // REEMPLAZA ESTO CON TUS DATOS DE FIREBASE CONSOLE
+        // IMPORTANTE: REEMPLAZA CON TUS LLAVES REALES DE FIREBASE CONSOLE
         const firebaseConfig = {
-            apiKey: "TU_API_KEY_REAL",
-            authDomain: "tucancha-tuproyecto.firebaseapp.com",
-            projectId: "tucancha-tuproyecto",
-            storageBucket: "tucancha-tuproyecto.appspot.com",
-            messagingSenderId: "000000000000",
-            appId: "1:000000000000:web:abcdef"
+            apiKey: "manu2010san-pixel",
+            authDomain: "tucancha-sanrafael.firebaseapp.com",
+            projectId: "tucancha-sanrafael",
+            storageBucket: "tucancha-sanrafael.appspot.com",
+            messagingSenderId: "000000000",
+            appId: "1:000000:web:abcdef"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -29,131 +29,133 @@
         window.createUser = createUserWithEmailAndPassword;
         window.signIn = signInWithEmailAndPassword;
         window.sendEmailVerif = sendEmailVerification;
-        window.doc = doc; window.setDoc = setDoc; window.getDoc = getDoc; window.updateDoc = updateDoc; window.increment = increment;
+        window.sendResetEmail = sendPasswordResetEmail;
+        window.doc = doc; window.setDoc = setDoc; window.getDoc = getDoc;
     </script>
 </head>
 <body>
 
-<header id="app-header" style="display: none;">
+<header id="app-header">
+    <button id="btn-atras-global" class="btn-atras" onclick="navegarAtras()" style="visibility: hidden;">
+        <i class="fas fa-arrow-left"></i>
+    </button>
     <div class="logo-container" id="logo-trigger" onclick="trucoAdmin()">
         <i class="fas fa-futbol"></i> TuCancha
     </div>
-    <div id="indicador-rol" class="badge-rol"></div>
+    <div id="indicador-rol" class="badge-rol">INICIO</div>
 </header>
 
 <div class="container">
     
-    <div id="view-inicio" class="view-inicial">
-        <div class="welcome-content">
+    <div id="view-inicio" class="view">
+        <div class="welcome-content card-field">
             <div class="logo-hero"><i class="fas fa-futbol fa-4x"></i><h1>TuCancha</h1></div>
-            <p>¿Qué vas a hacer hoy?</p>
+            <p>San Rafael, Mendoza</p>
             <div class="selector-roles">
-                <button class="card-role" onclick="seleccionarRol('cliente')"><i class="fas fa-running fa-2x"></i><span>Jugador</span></button>
-                <button class="card-role" onclick="seleccionarRol('dueno')"><i class="fas fa-whistle fa-2x"></i><span>Propietario</span></button>
+                <button class="card-role card-field" onclick="cambiarVista('view-jugador-market', 'JUGADOR')">
+                    <i class="fas fa-running fa-2x"></i><span>Jugador</span>
+                </button>
+                <button class="card-role card-field" onclick="cambiarVista('view-propietario-acceso', 'PROPIETARIO')">
+                    <i class="fas fa-whistle fa-2x"></i><span>Propietario</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="view-dueno-acceso" class="view" style="display: none;">
-        <div id="selector-acceso" class="setup-card">
+    <div id="view-propietario-acceso" class="view" style="display: none;">
+        <div class="setup-card card-field">
             <h2>Panel de Propietarios</h2>
-            <button class="btn-primary" onclick="mostrarLogin()">Ingresar a mi cuenta</button>
-            <button class="btn-primary" style="background:#2c3e50; margin-top:10px;" onclick="mostrarRegistro()">Registrar mi Complejo</button>
+            <button class="btn-dark-green" onclick="cambiarVista('view-propietario-login')">Entrar a mi cuenta</button>
+            <button class="btn-outline" onclick="cambiarVista('view-propietario-registro')">Registrar Complejo</button>
         </div>
+    </div>
 
-        <div id="form-login" class="setup-card" style="display: none;">
+    <div id="view-propietario-login" class="view" style="display: none;">
+        <div class="setup-card card-field">
             <h2>Ingresar</h2>
             <input type="email" id="login-email" placeholder="Email">
             <input type="password" id="login-pass" placeholder="Contraseña">
-            <button class="btn-primary" onclick="loginDueno()">Entrar al Panel</button>
-        </div>
-
-        <div id="flujo-registro" style="display: none;">
-            <div id="step-1" class="setup-card">
-                <h2>Paso 1: Email</h2><input type="email" id="owner-email" placeholder="tu@email.com">
-                <button class="btn-primary" onclick="nextStep(2)">Continuar</button>
-            </div>
-            <div id="step-2" class="setup-card" style="display: none;">
-                <h2>Paso 2: Confirmación</h2><p>Te enviaremos un link real al terminar.</p>
-                <input type="text" placeholder="Código visual" class="code-input">
-                <button class="btn-primary" onclick="nextStep(3)">Validar</button>
-            </div>
-            <div id="step-3" class="setup-card" style="display: none;">
-                <h2>Paso 3: Seguridad</h2><input type="password" id="owner-pass" placeholder="Crea tu clave">
-                <button class="btn-primary" onclick="nextStep(4)">Definir</button>
-            </div>
-            <div id="step-4" class="setup-card" style="display: none;">
-                <h2>Paso 4: Tu Complejo</h2>
-                <input type="text" id="complex-name" placeholder="Nombre del Complejo">
-                <input type="number" id="complex-qty" placeholder="¿Cuántas canchas tienes?">
-                <button class="btn-primary" onclick="nextStep(5)">Siguiente</button>
-            </div>
-            <div id="step-5" class="setup-card" style="display: none;">
-                <h2>Paso 5: Cobros</h2>
-                <input type="text" id="billetera-dato" placeholder="Alias, CBU o CVU">
-                <button class="btn-primary" onclick="finalizarRegistroReal()">Finalizar y Verificar</button>
-            </div>
+            <button class="btn-dark-green" onclick="loginPropietario()">Entrar</button>
+            <p class="link-text" onclick="cambiarVista('view-propietario-reset')">¿Olvidaste tu contraseña?</p>
         </div>
     </div>
 
-    <div id="view-dueno-menu" class="view" style="display: none;">
+    <div id="view-propietario-reset" class="view" style="display: none;">
+        <div class="setup-card card-field">
+            <h2>Recuperar Clave</h2>
+            <p>Te enviaremos un link a tu correo.</p>
+            <input type="email" id="reset-email" placeholder="Email">
+            <button class="btn-dark-green" onclick="recuperarClave()">Enviar Link</button>
+        </div>
+    </div>
+
+    <div id="view-propietario-registro" class="view" style="display: none;">
+        <div id="step-1" class="setup-card card-field">
+            <h3>Paso 1: Email</h3>
+            <input type="email" id="reg-email" placeholder="tu@email.com">
+            <button class="btn-dark-green" onclick="validarPaso(1, 2)">Siguiente</button>
+        </div>
+        <div id="step-2" class="setup-card card-field" style="display: none;">
+            <h3>Paso 2: Seguridad</h3>
+            <input type="password" id="reg-pass" placeholder="Clave (mín. 6 caracteres)">
+            <button class="btn-dark-green" onclick="validarPaso(2, 3)">Siguiente</button>
+        </div>
+        <div id="step-3" class="setup-card card-field" style="display: none;">
+            <h3>Paso 3: El Complejo</h3>
+            <input type="text" id="reg-nombre" placeholder="Nombre del Complejo">
+            <input type="number" id="reg-cantidad" placeholder="¿Cuántas canchas tenés?">
+            <button class="btn-dark-green" onclick="validarPaso(3, 4)">Siguiente</button>
+        </div>
+        <div id="step-4" class="setup-card card-field" style="display: none;">
+            <h3>Paso 4: Cobros</h3>
+            <input type="text" id="reg-billetera" placeholder="Alias o CBU">
+            <button class="btn-dark-green" onclick="finalizarRegistro()">Finalizar y Verificar</button>
+        </div>
+    </div>
+
+    <div id="view-propietario-menu" class="view" style="display: none;">
         <div class="menu-grid">
-            <button class="menu-item" onclick="abrirSeccion('config')"><i class="fas fa-cog"></i><span>Configuración</span></button>
-            <button class="menu-item" onclick="abrirSeccion('canchas')"><i class="fas fa-layer-group"></i><span>Mis Canchas</span></button>
-            <button class="menu-item" onclick="abrirSeccion('reservas')"><i class="fas fa-calendar-check"></i><span>Reservas</span></button>
-            <button class="menu-item" onclick="abrirSeccion('pagos')"><i class="fas fa-wallet"></i><span>Pagos</span></button>
+            <button class="menu-item card-field" onclick="abrirSeccion('canchas')"><i class="fas fa-futbol"></i><span>Mis Canchas</span></button>
+            <button class="menu-item card-field" onclick="abrirSeccion('pagos')"><i class="fas fa-wallet"></i><span>Pagos</span></button>
         </div>
         <div id="sec-canchas" class="seccion-detalle" style="display: none;">
-            <h3>Gestión de Canchas</h3>
-            <div id="contenedor-mis-canchas"></div>
-            <button class="btn-primary" style="background:gray" onclick="volverMenu()">Volver</button>
+            <h3>Mis Canchas</h3>
+            <div id="listado-canchas"></div>
         </div>
         <div id="sec-pagos" class="seccion-detalle" style="display: none;">
-            <div class="panel-stats"><p>Ganancia Neta (95%)</p><h2 id="total-neto-dueno">$0</h2></div>
-            <button class="btn-primary" onclick="volverMenu()">Volver</button>
+            <div class="panel-stats card-field"><p>Ganancia Neta (95%)</p><h2 id="txt-ganancia">$0</h2></div>
         </div>
     </div>
 
-    <div id="view-cliente" class="view" style="display: none;">
-        <div class="marketplace-header">
-            <h2>San Rafael, Mendoza</h2>
-            <div class="search-bar"><i class="fas fa-search"></i> Buscar canchas...</div>
-        </div>
-        <div id="pedidosya-list"></div>
+    <div id="view-jugador-market" class="view" style="display: none;">
+        <div class="marketplace-header"><h2>Canchas en San Rafael</h2></div>
+        <div id="market-list"></div>
     </div>
 
-    <div id="view-cancha-detalle" class="view" style="display: none;">
-        <div class="detalle-header">
-            <button class="btn-back" onclick="cerrarDetalle()"><i class="fas fa-chevron-left"></i></button>
-            <div class="detalle-img"></div>
-        </div>
-        <div class="detalle-info">
-            <h2 id="det-nombre">Nombre de la Cancha</h2>
-            <div class="py-rating">⭐ 4.9 (San Rafael)</div>
+    <div id="view-jugador-detalle" class="view" style="display: none;">
+        <div class="detalle-img" id="det-img"></div>
+        <div class="detalle-info card-field">
+            <h2 id="det-nombre">Nombre</h2>
             <hr>
-            <h3>Elige tu horario</h3>
             <div class="calendar-grid">
-                <div class="time-slot available" onclick="seleccionarTurno(this)">18:00</div>
-                <div class="time-slot available" onclick="seleccionarTurno(this)">19:00</div>
-                <div class="time-slot busy">20:00</div>
-                <div class="time-slot available" onclick="seleccionarTurno(this)">21:00</div>
+                <div class="time-slot card-field available" onclick="seleccionarTurno(this)">19:00</div>
+                <div class="time-slot card-field busy">20:00</div>
+                <div class="time-slot card-field available" onclick="seleccionarTurno(this)">21:00</div>
             </div>
-            <div class="sticky-footer">
-                <p id="txt-anticipo">Anticipo 30%: $0</p>
-                <button class="btn-primary" onclick="procesarReserva()">PAGAR ANTICIPO</button>
-                <button class="btn-maps" id="btn-maps-link"><i class="fas fa-map-marker-alt"></i> Cómo llegar</button>
-            </div>
+            <p id="det-anticipo">Anticipo: $0</p>
+            <button class="btn-dark-green" onclick="reservarWhatsApp()">RESERVAR POR WHATSAPP</button>
         </div>
     </div>
 
     <div id="view-admin-gilda" class="view" style="display: none;">
-        <div class="admin-panel-card">
-            <i class="fas fa-shield-halved fa-3x" style="color: #f1c40f;"></i>
-            <h2>Panel Gilda Mariana</h2>
-            <div class="stat-item"><p>Comisiones Totales (5%)</p><h1 id="plata-gilda">$0</h1></div>
-            <button class="btn-primary" onclick="location.reload()">Cerrar Panel</button>
+        <div class="admin-card card-field">
+            <h2>Panel Admin Gilda</h2>
+            <p>Comisiones del 5%</p>
+            <h1 id="txt-gilda">$0</h1>
+            <button class="btn-outline" onclick="location.reload()">Cerrar</button>
         </div>
     </div>
+
 </div>
 
 <script src="script.js"></script>
