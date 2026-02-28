@@ -13,8 +13,9 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // CONFIGURACIÓN: REEMPLAZA CON TUS DATOS DE FIREBASE CONSOLE
         const firebaseConfig = {
-            apiKey: "AIzaSyDVWhCOgmStnM14QTHdmrmEzVKQKPTtM-Q", // <--- PEGA TU CLAVE REAL ACÁ
+            apiKey: "TU_API_KEY_REAL",
             authDomain: "tucancha-58841.firebaseapp.com",
             projectId: "tucancha-58841",
             storageBucket: "tucancha-58841.appspot.com",
@@ -49,7 +50,7 @@
     <div id="view-inicio" class="view">
         <div class="welcome-content card-field">
             <div class="logo-hero"><i class="fas fa-futbol fa-4x"></i><h1>TuCancha</h1></div>
-            <p style="font-weight: 800; color: #1B5E20;">SAN RAFAEL, MENDOZA</p>
+            <p style="font-weight: 800;">SAN RAFAEL, MENDOZA</p>
             <div class="selector-roles">
                 <button class="card-role card-field" onclick="cambiarVista('view-jugador-market', 'JUGADOR')">
                     <i class="fas fa-running fa-2x"></i><span>Jugador</span>
@@ -63,8 +64,8 @@
 
     <div id="view-propietario-acceso" class="view" style="display: none;">
         <div class="setup-card card-field">
-            <h2>Panel Propietarios</h2>
-            <button class="btn-dark-green" onclick="cambiarVista('view-propietario-login')">Entrar</button>
+            <h2>Acceso Propietarios</h2>
+            <button class="btn-dark-green" onclick="cambiarVista('view-propietario-login')">Ingresar</button>
             <button class="btn-outline" onclick="cambiarVista('view-propietario-registro')">Nuevo Registro</button>
         </div>
     </div>
@@ -75,16 +76,7 @@
             <input type="email" id="login-email" placeholder="Email">
             <input type="password" id="login-pass" placeholder="Contraseña">
             <button class="btn-dark-green" onclick="loginPropietario()">Entrar</button>
-            <p class="link-text" onclick="cambiarVista('view-propietario-reset')">Olvidé mi contraseña</p>
-        </div>
-    </div>
-
-    <div id="view-propietario-reset" class="view" style="display: none;">
-        <div class="setup-card card-field">
-            <h2>Recuperar Clave</h2>
-            <p>Se enviará un link a tu correo.</p>
-            <input type="email" id="reset-email" placeholder="Email">
-            <button class="btn-dark-green" onclick="recuperarClave()">Enviar Link</button>
+            <p class="link-text" onclick="cambiarVista('view-propietario-reset')">¿Olvidaste tu contraseña?</p>
         </div>
     </div>
 
@@ -100,15 +92,15 @@
             <button class="btn-dark-green" onclick="validarPaso(2, 3)">Siguiente</button>
         </div>
         <div id="step-3" class="setup-card card-field" style="display: none;">
-            <h3>Paso 3: El Complejo</h3>
+            <h3>Paso 3: Complejo</h3>
             <input type="text" id="reg-nombre" placeholder="Nombre del Complejo">
-            <input type="number" id="reg-cantidad" placeholder="¿Cuántas canchas tenés?">
+            <input type="number" id="reg-cantidad" placeholder="¿Cuántas canchas?">
             <button class="btn-dark-green" onclick="validarPaso(3, 4)">Siguiente</button>
         </div>
         <div id="step-4" class="setup-card card-field" style="display: none;">
             <h3>Paso 4: Cobros</h3>
             <input type="text" id="reg-billetera" placeholder="Alias o CBU">
-            <button class="btn-dark-green" onclick="finalizarRegistro()">Finalizar Registro</button>
+            <button class="btn-dark-green" onclick="finalizarRegistro()">Finalizar</button>
         </div>
     </div>
 
@@ -120,13 +112,11 @@
     <div id="view-jugador-detalle" class="view" style="display: none;">
         <div class="detalle-img" id="det-img"></div>
         <div class="detalle-info card-field">
-            <h2 id="det-nombre">Cancha</h2>
-            <hr>
+            <h2 id="det-nombre">Nombre</h2>
             <div class="calendar-grid">
                 <div class="time-slot card-field available" onclick="seleccionarTurno(this)">19:00</div>
                 <div class="time-slot card-field available" onclick="seleccionarTurno(this)">21:00</div>
             </div>
-            <p id="det-anticipo" style="font-weight: bold;">Seña (30%): $0</p>
             <button class="btn-dark-green" onclick="reservarWhatsApp()">RESERVAR POR WHATSAPP</button>
         </div>
     </div>
