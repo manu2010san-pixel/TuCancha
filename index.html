@@ -11,7 +11,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDVWhCOgmStnM14QTHdmrmEzVKQKPTtM-Q",
@@ -29,7 +29,7 @@
         window.signIn = signInWithEmailAndPassword;
         window.sendEmailVerif = sendEmailVerification;
         window.sendResetEmail = sendPasswordResetEmail;
-        window.doc = doc; window.setDoc = setDoc; window.getDoc = getDoc;
+        window.dbUtils = { doc, setDoc, getDoc, collection, addDoc, getDocs, query, where };
     </script>
 </head>
 <body>
@@ -49,7 +49,7 @@
     <div id="view-inicio" class="view">
         <div class="welcome-content card-field">
             <div class="logo-hero"><i class="fas fa-futbol fa-4x"></i><h1>TuCancha</h1></div>
-            <p style="font-weight: 800;">SAN RAFAEL, MENDOZA</p>
+            <p style="font-weight: 800;">MENDOZA • SAN RAFAEL</p>
             <div class="selector-roles">
                 <button class="card-role card-field" onclick="cambiarVista('view-jugador-market', 'JUGADOR')">
                     <i class="fas fa-running fa-2x"></i><span>Jugador</span>
@@ -63,9 +63,9 @@
 
     <div id="view-propietario-acceso" class="view" style="display: none;">
         <div class="setup-card card-field">
-            <h2>Acceso Propietarios</h2>
+            <h2>Panel Propietarios</h2>
             <button class="btn-dark-green" onclick="cambiarVista('view-propietario-login')">Ingresar</button>
-            <button class="btn-outline" onclick="cambiarVista('view-propietario-registro')">Nuevo Registro</button>
+            <button class="btn-outline" onclick="cambiarVista('view-propietario-registro')">Registrar Complejo</button>
         </div>
     </div>
 
@@ -76,6 +76,14 @@
             <input type="password" id="login-pass" placeholder="Contraseña">
             <button class="btn-dark-green" onclick="loginPropietario()">Entrar</button>
             <p class="link-text" onclick="cambiarVista('view-propietario-reset')">¿Olvidaste tu contraseña?</p>
+        </div>
+    </div>
+
+    <div id="view-propietario-reset" class="view" style="display: none;">
+        <div class="setup-card card-field">
+            <h2>Recuperar Clave</h2>
+            <input type="email" id="reset-email" placeholder="Email">
+            <button class="btn-dark-green" onclick="recuperarClave()">Enviar Link</button>
         </div>
     </div>
 
@@ -91,7 +99,7 @@
             <button class="btn-dark-green" onclick="validarPaso(2, 3)">Siguiente</button>
         </div>
         <div id="step-3" class="setup-card card-field" style="display: none;">
-            <h3>Paso 3: Complejo</h3>
+            <h3>Paso 3: El Complejo</h3>
             <input type="text" id="reg-nombre" placeholder="Nombre del Complejo">
             <input type="number" id="reg-cantidad" placeholder="¿Cuántas canchas?">
             <button class="btn-dark-green" onclick="validarPaso(3, 4)">Siguiente</button>
@@ -103,6 +111,30 @@
         </div>
     </div>
 
+    <div id="view-propietario-menu" class="view" style="display: none;">
+        <div class="menu-grid">
+            <button class="menu-item card-field" onclick="abrirSeccion('canchas')"><i class="fas fa-futbol"></i><span>Mis Canchas</span></button>
+            <button class="menu-item card-field" onclick="abrirSeccion('pagos')"><i class="fas fa-wallet"></i><span>Pagos</span></button>
+        </div>
+        <div id="sec-canchas" class="seccion-detalle" style="display: none;">
+            <div class="card-field" style="margin-bottom: 20px;">
+                <h3>+ Agregar Nueva Cancha</h3>
+                <input type="text" id="nueva-cancha-nombre" placeholder="Nombre (ej: La Bombonerita)">
+                <input type="number" id="nueva-cancha-precio" placeholder="Precio por Hora ($)">
+                <select id="nueva-cancha-suelo">
+                    <option value="Sintético">Sintético</option>
+                    <option value="Natural">Natural</option>
+                    <option value="Tierra">Tierra</option>
+                </select>
+                <button class="btn-dark-green" onclick="guardarCancha()">Guardar Cancha</button>
+            </div>
+            <div id="listado-canchas-pro"></div>
+        </div>
+        <div id="sec-pagos" class="seccion-detalle" style="display: none;">
+            <div class="panel-stats card-field"><p>Ganancia Neta (95%)</p><h2 id="txt-ganancia">$0</h2></div>
+        </div>
+    </div>
+
     <div id="view-jugador-market" class="view" style="display: none;">
         <div class="marketplace-header"><h2>Canchas en San Rafael</h2></div>
         <div id="market-list"></div>
@@ -111,9 +143,10 @@
     <div id="view-jugador-detalle" class="view" style="display: none;">
         <div class="detalle-img" id="det-img"></div>
         <div class="detalle-info card-field">
-            <h2 id="det-nombre">Nombre</h2>
+            <h2 id="det-nombre">Cancha</h2>
             <div class="calendar-grid">
                 <div class="time-slot card-field available" onclick="seleccionarTurno(this)">19:00</div>
+                <div class="time-slot card-field busy">20:00</div>
                 <div class="time-slot card-field available" onclick="seleccionarTurno(this)">21:00</div>
             </div>
             <button class="btn-dark-green" onclick="reservarWhatsApp()">RESERVAR POR WHATSAPP</button>
@@ -133,4 +166,3 @@
 <script src="script.js"></script>
 </body>
 </html>
-
